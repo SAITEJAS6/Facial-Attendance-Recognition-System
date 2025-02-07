@@ -1,0 +1,80 @@
+import face_recognition
+import cv2
+import os
+from datetime import datetime
+
+# Function to get face encodings and names from face_images folder
+def get_known_faces():
+    known_faces = []
+    known_names = []
+
+    for file_name in os.listdir("face_images/"):
+        if file_name.endswith(".jpg"):
+            face_image = face_recognition.load_image_file("face_images/" + file_name)
+            face_encoding = face_recognition.face_encodings(face_image)[0]
+            known_faces.append(face_encoding)
+            known_names.append(os.path.splitext(file_name)[0])
+
+    return known_faces, known_names
+
+# Function to mark attendance with name, date, and time
+def mark_attendance(name, shift):
+    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    file_path = f"attendance_{shift}.txt"  # File path for the attendance file based on shift
+    with open(file_path, "a") as file:
+        file.write(f"{name} - {current_time}\n")
+
+# Initialize webcam for real-time face recognition
+video_capture = cv2.VideoCapture(0)
+
+known_faces, known_names = get_known_faces()
+recognized_names = {name: {"morning": False, "evening": False} for name in known_names}
+
+while True:
+    # Capture frame-by-frame
+    ret, frame = video_capture.read()
+
+    # Find all face locations and face encodings in the current frame
+    face_locations = face_recognition.face_locations(frame)
+    face_encodings = face_recognition.face_encodings(frame, face_locations)
+
+    # Loop through each face in this frame
+    for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
+        # Check if the face matches any known faces
+        matches = face_recognition.compare_faces(known_faces, face_encoding)
+        name = "Unknown"
+
+        # If a match was found, use the name of the known person
+        if True in matches:
+            first_match_index = matches.index(True)
+            name = known_names[first_match_index]
+            shift = "morning" if datetime.now().hour < 12 else "evening"
+
+            # Check if the person is not already marked present for the current shift
+            if not recognized_names[name][shift]:
+                mark_attendance(name, shift)  # Mark attendance with name, date, time, and shift
+                recognized_names[name][shift] = True
+            else:
+                # Display message if attendance is already marked for the person in the current shift
+                font = cv2.FONT_HERSHEY_DUPLEX
+                cv2.putText(frame, "ATTENDANCE ALREADY MARKED", (left + 6, bottom + 30), font, 0.5, (0, 0, 255), 1)
+
+        # Draw a rectangle around the face and display the name
+        rectangle_color = (0, 255, 0) if name != "Unknown" and not recognized_names[name][shift] else (0, 0, 255)
+        cv2.rectangle(frame, (left, top), (right, bottom), rectangle_color, 2)
+        font = cv2.FONT_HERSHEY_DUPLEX
+        cv2.putText(frame, name, (left + 6, bottom - 6), font, 0.5, (255, 255, 255), 1)
+
+    # Display the resulting frame
+    cv2.imshow("Video", frame)
+
+    # Check for keyboard input
+    key = cv2.waitKey(1) & 0xFF
+
+    # Break the loop when 'q' or '6' is pressed
+    if key == ord("q") or key == 6:
+        break
+
+# Release the webcam and close all windows
+video_capture.release()
+cv2.destroyAllWindows()
