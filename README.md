@@ -5,12 +5,12 @@ The Facial Attendance Recognition System is an advanced AI-based solution design
 By leveraging machine learning, OpenCV, and face recognition algorithms, this system ensures high accuracy and efficiency in attendance tracking, making it ideal for schools, offices, and other institutions. The system eliminates fraudulent check-ins, reduces human errors, and speeds up the attendance process.
 
 Key Highlights:
-✔ Real-time face detection & recognition using AI-powered algorithms.
-✔ Automatic attendance logging with time stamps.
-✔ Multi-user support – recognizes and stores multiple faces.
-✔ Secure and scalable database storage (CSV/SQLite).
-✔ User-friendly interface (GUI-based with Tkinter or Flask).
-✔ Fast & efficient processing with minimal recognition errors.
+- Real-time face detection & recognition using AI-powered algorithms.
+- Automatic attendance logging with time stamps.
+- Multi-user support – recognizes and stores multiple faces.
+- Secure and scalable database storage (CSV/SQLite).
+- User-friendly interface (GUI-based with Tkinter or Flask).
+- Fast & efficient processing with minimal recognition errors.
 
 ##  Tech Stack  
 - **Programming Language:** Python  
